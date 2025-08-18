@@ -2,7 +2,6 @@ package bt.com.beautique.api.services.impl;
 
 import bt.com.beautique.api.dtos.BeautyProcedureDTO;
 import bt.com.beautique.api.entities.BeautyProceduresEntity;
-import bt.com.beautique.api.entities.CustomerEntity;
 import bt.com.beautique.api.repositories.BeautyProcedureRepository;
 import bt.com.beautique.api.utils.ConverterUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Objects;
 
 @Service
-public class BeautyProcedureService implements bt.com.beautique.api.services.BeautyProcedureService {
+public class BeautyProcedureServiceImpl implements bt.com.beautique.api.services.BeautyProcedureService {
 
     @Autowired
     private BeautyProcedureRepository beautyProcedureRepository;
@@ -50,11 +49,11 @@ public class BeautyProcedureService implements bt.com.beautique.api.services.Bea
             beautyProcedureToEdit.setPrice(beautyProcedureDTO.getPrice());
         }
 
-        BeautyProceduresEntity beautyProceduresToEntityForSave = converterUtil.convertToSource(beautyProcedureDTO);
 
-        beautyProcedureRepository.save(beautyProceduresToEntityForSave);
 
-        return converterUtil.convertToTarget(beautyProceduresToEntityForSave);
+        beautyProcedureRepository.save(beautyProcedureToEdit);
+
+        return converterUtil.convertToTarget(beautyProcedureToEdit);
 
 
 

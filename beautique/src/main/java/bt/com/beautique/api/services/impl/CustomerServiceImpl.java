@@ -33,8 +33,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     private CustomerEntity findById(Long id) throws ResponseStatusException {
        return customerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found"));
-
-
     }
 
     @Override
