@@ -41,7 +41,7 @@ public class BeautyProcedureServiceImpl implements bt.com.beautique.api.services
         BeautyProceduresEntity beautyProcedureToEdit = findById(id);
         if (beautyProcedureDTO.getName() != null
                 && !Objects.equals(beautyProcedureToEdit.getName(), beautyProcedureDTO.getName())) {
-            beautyProcedureToEdit.setName(beautyProcedureToEdit.getName());
+            beautyProcedureToEdit.setName(beautyProcedureDTO.getName());
         }
 
         if (beautyProcedureDTO.getDescription() != null
