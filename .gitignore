@@ -38,6 +38,8 @@ Thumbs.db
 # =========================================
 # Pastas de dados de containers
 postgres-data/
+rabbitmq-data/
+rabbitmq-log/
 mysql-data/
 mongo-data/
 redis-data/
