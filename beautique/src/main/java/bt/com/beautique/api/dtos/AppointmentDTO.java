@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class AppointmentDTO {
     private Long id;
     private LocalDateTime dateTime;
-    private Boolean appointment;
+    private Boolean appointmentsIsOpen;
     private Long customer;
     private Long beautyProcedure;
 }

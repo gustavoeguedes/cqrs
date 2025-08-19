@@ -17,8 +17,8 @@ public class AppointmentsEntity extends BaseEntity {
     @Column(nullable = false, updatable = true)
     private LocalDateTime dateTime;
 
-    @Column(nullable = false)
-    private Boolean appointment;
+    @Column(name = "appointments_is_open", nullable = false)
+    private Boolean appointmentsIsOpen;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = true)
