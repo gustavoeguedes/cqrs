@@ -42,6 +42,7 @@ rabbitmq-data/
 rabbitmq-log/
 mysql-data/
 mongo-data/
+db-mongodb/
 redis-data/
 
 # Volumes temporários

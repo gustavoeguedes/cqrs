@@ -14,6 +14,7 @@ services:
     networks:
       - beautique-network
   rabbitmq:
+
     image: rabbitmq:3-management
     hostname: rabbitmq
     environment:
@@ -27,6 +28,21 @@ services:
     volumes:
       - './rabbitmq-data:/var/lib/rabbitmq'
       - './rabbitmq-log:/var/log/rabbitmq'
+
+  mongodb:
+    image: 'mongo:latest'
+    hostname: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+      - MONGO_INITDB_ROOT_PASSWORD=mongopassword
+    ports:
+      - "27017:27017"
+    networks:
+      - beautique-network
+        
+    volumes:
+      - './db-mongodb:/data/db'
+      - './mongodb-init.sh:/docker-entrypoint-initdb.d/mongodb-init.sh'
 
 networks:
   beautique-network:
