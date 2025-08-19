@@ -3,6 +3,7 @@ package bt.com.beautique.api.services.impl;
 import bt.com.beautique.api.dtos.CustomerDTO;
 import bt.com.beautique.api.entities.CustomerEntity;
 import bt.com.beautique.api.repositories.CustomerRepository;
+import bt.com.beautique.api.services.BrokerService;
 import bt.com.beautique.api.services.CustomerService;
 import bt.com.beautique.api.utils.ConverterUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private BrokerService brokerService;
+
     private final ConverterUtil<CustomerEntity, CustomerDTO> converterUtil = new ConverterUtil<>(CustomerEntity.class, CustomerDTO.class);
 
 
@@ -25,6 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO create(CustomerDTO customerDTO) {
         CustomerEntity customerEntity = converterUtil.convertToSource(customerDTO);
         CustomerEntity savedCustomer = customerRepository.save(customerEntity);
+        sendCustomerToQueue(savedCustomer);
         return converterUtil.convertToTarget(savedCustomer);
     }
 
@@ -62,8 +67,19 @@ public class CustomerServiceImpl implements CustomerService {
 
 
         CustomerEntity customerUpdated = customerRepository.save(customerToUpdate);
-
+        sendCustomerToQueue(customerUpdated);
         return converterUtil.convertToTarget(customerUpdated);
 
+    }
+
+    private void sendCustomerToQueue(CustomerEntity customerEntity) {
+        CustomerDTO customerDTO = CustomerDTO.builder()
+                .id(customerEntity.getId())
+                .name(customerEntity.getName())
+                .email(customerEntity.getEmail())
+                .phone(customerEntity.getPhone())
+                .build();
+
+        brokerService.send("customer", customerDTO);
     }
 }

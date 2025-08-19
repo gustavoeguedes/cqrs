@@ -1,6 +1,9 @@
 package bt.com.beautique.api.services.impl;
 
 import bt.com.beautique.api.dtos.AppointmentDTO;
+import bt.com.beautique.api.dtos.BeautyProcedureDTO;
+import bt.com.beautique.api.dtos.CustomerDTO;
+import bt.com.beautique.api.dtos.FullAppointmentDTO;
 import bt.com.beautique.api.entities.AppointmentsEntity;
 import bt.com.beautique.api.entities.BeautyProceduresEntity;
 import bt.com.beautique.api.entities.CustomerEntity;
@@ -8,7 +11,9 @@ import bt.com.beautique.api.repositories.AppointmentsRepository;
 import bt.com.beautique.api.repositories.BeautyProcedureRepository;
 import bt.com.beautique.api.repositories.CustomerRepository;
 import bt.com.beautique.api.services.AppointmentsService;
+import bt.com.beautique.api.services.BrokerService;
 import bt.com.beautique.api.utils.ConverterUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,8 @@ import java.util.Objects;
 
 @Service
 public class AppointmentsServiceImpl implements AppointmentsService {
+
+    private final ModelMapper modelMapper = new ModelMapper();
 
     private final ConverterUtil<AppointmentDTO, AppointmentsEntity> converterUtil = new ConverterUtil<>(AppointmentDTO.class, AppointmentsEntity.class);
 
@@ -29,6 +36,22 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private BrokerService brokerService;
+
+    private void sendAppointmentToQueue(AppointmentsEntity appointmentsEntity) {
+        CustomerDTO customerDTO = appointmentsEntity.getCustomer() != null ? modelMapper.map(appointmentsEntity.getCustomer(), CustomerDTO.class) : null;
+        BeautyProcedureDTO beautyProcedureDto = appointmentsEntity.getBeautyProcedure() != null ? modelMapper.map(appointmentsEntity.getBeautyProcedure(), BeautyProcedureDTO.class) : null;
+        FullAppointmentDTO fullAppointmentDTO = FullAppointmentDTO.builder()
+                .id(appointmentsEntity.getId())
+                .dateTime(appointmentsEntity.getDateTime())
+                .appointmentsIsOpen(appointmentsEntity.getAppointmentsIsOpen())
+                .customer(customerDTO)
+                .beautyProcedure(beautyProcedureDto)
+                .build();
+        brokerService.send("appointments", fullAppointmentDTO);
+    }
 
     private AppointmentsEntity findById(Long id) {
         return appointmentsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "appointment not found"));
@@ -58,6 +81,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         AppointmentsEntity appointmentToSave = converterUtil.convertToTarget(appointmentDTO);
         AppointmentsEntity appointmentSaved = appointmentsRepository.save(appointmentToSave);
 
+        sendAppointmentToQueue(appointmentSaved);
         return converterUtil.convertToSource(appointmentSaved);
     }
 
@@ -78,6 +102,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
         AppointmentsEntity updated = appointmentsRepository.save(appointmentToUpdate);
 
+        sendAppointmentToQueue(updated);
         return converterUtil.convertToSource(updated);
     }
 
@@ -96,6 +121,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentsEntity.setBeautyProcedure(beautyProceduresEntity);
         appointmentsEntity.setAppointmentsIsOpen(false);
         AppointmentsEntity updatedAppointmentEntity = appointmentsRepository.save(appointmentsEntity);
+        sendAppointmentToQueue(updatedAppointmentEntity);
         return buildAppointmentDto(updatedAppointmentEntity);
     }
 }
